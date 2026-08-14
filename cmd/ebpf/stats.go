@@ -119,6 +119,22 @@ func (stat *UpfXdpActionStatistic) GetUpfExtStat() UpfCounters {
 	return counters
 }
 
+// GetTxBytes returns the forwarded bytes on the n3 and n6 tx legs, summed across CPUs, so a
+// controller can derive a real busy-hour throughput for load-aware placement (eUPF's action
+// stats are packet counts only).
+func (stat *UpfXdpActionStatistic) GetTxBytes() (n3 uint64, n6 uint64) {
+	var statistics []IpEntrypointUpfStatistic
+	if err := stat.BpfObjects.UpfExtStat.Lookup(uint32(0), &statistics); err != nil {
+		log.Info().Msg(err.Error())
+		return 0, 0
+	}
+	for _, s := range statistics {
+		n3 += s.UpfN3N6Counter.TxN3Bytes
+		n6 += s.UpfN3N6Counter.TxN6Bytes
+	}
+	return n3, n6
+}
+
 // Getters for the upf_ext_stat (upf_counters)
 func (stat *UpfXdpActionStatistic) GetUpfExtStatDelta() UpfCounters {
 

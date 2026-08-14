@@ -39,6 +39,8 @@ struct n3_n6_counters {
     __u64 tx_n3;
     __u64 rx_n6;
     __u64 tx_n6;
+    __u64 tx_n3_bytes; // forwarded bytes on each tx leg, so a controller can derive a real
+    __u64 tx_n6_bytes; // busy-hour throughput for load-aware placement (eUPF had only counts)
 };
 
 #define EUPF_MAX_XDP_ACTION 8

@@ -77,6 +77,7 @@ static __always_inline enum xdp_action send_to_gtp_tunnel(struct packet_context 
         return XDP_ABORTED;
     upf_printk("upf: send gtp pdu %pI4 -> %pI4", &ctx->ip4->saddr, &ctx->ip4->daddr);
     increment_counter(ctx->n3_n6_counter, tx_n3);
+    ctx->n3_n6_counter->tx_n3_bytes += (__u64)(ctx->xdp_ctx->data_end - ctx->xdp_ctx->data);
     if (far_wants_mirror(far))
         return bpf_redirect_map(&mirror_devmap_dl, 0, BPF_F_BROADCAST | BPF_F_EXCLUDE_INGRESS);
     return route_ipv4(ctx->xdp_ctx, ctx->eth, ctx->ip4);
@@ -385,6 +386,7 @@ static __always_inline enum xdp_action handle_gtp_packet(struct packet_context *
      */
     if (ctx->ip4 || ctx->ip6) {
         increment_counter(ctx->n3_n6_counter, tx_n6);
+        ctx->n3_n6_counter->tx_n6_bytes += (__u64)(ctx->xdp_ctx->data_end - ctx->xdp_ctx->data);
         if (far_wants_mirror(far))
             return bpf_redirect_map(&mirror_devmap_ul, 0, BPF_F_BROADCAST | BPF_F_EXCLUDE_INGRESS);
     }

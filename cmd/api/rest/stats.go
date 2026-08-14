@@ -7,11 +7,13 @@ import (
 )
 
 type XdpStats struct {
-	Aborted  uint64 `json:"aborted"`
-	Drop     uint64 `json:"drop"`
-	Pass     uint64 `json:"pass"`
-	Tx       uint64 `json:"tx"`
-	Redirect uint64 `json:"redirect"`
+	Aborted   uint64 `json:"aborted"`
+	Drop      uint64 `json:"drop"`
+	Pass      uint64 `json:"pass"`
+	Tx        uint64 `json:"tx"`
+	Redirect  uint64 `json:"redirect"`
+	TxN3Bytes uint64 `json:"tx_n3_bytes"` // forwarded bytes per tx leg, for load-aware placement
+	TxN6Bytes uint64 `json:"tx_n6_bytes"`
 }
 
 type PacketStats struct {
@@ -50,12 +52,15 @@ type RouteStats struct {
 //	@Success		200	{object}	XdpStats
 //	@Router			/xdp_stats [get]
 func (h *ApiHandler) displayXdpStatistics(c *gin.Context) {
+	n3b, n6b := h.ForwardPlaneStats.GetTxBytes()
 	c.IndentedJSON(http.StatusOK, XdpStats{
-		Aborted:  h.ForwardPlaneStats.GetAborted(),
-		Drop:     h.ForwardPlaneStats.GetDrop(),
-		Pass:     h.ForwardPlaneStats.GetPass(),
-		Tx:       h.ForwardPlaneStats.GetTx(),
-		Redirect: h.ForwardPlaneStats.GetRedirect(),
+		Aborted:   h.ForwardPlaneStats.GetAborted(),
+		Drop:      h.ForwardPlaneStats.GetDrop(),
+		Pass:      h.ForwardPlaneStats.GetPass(),
+		Tx:        h.ForwardPlaneStats.GetTx(),
+		Redirect:  h.ForwardPlaneStats.GetRedirect(),
+		TxN3Bytes: n3b,
+		TxN6Bytes: n6b,
 	})
 }
 
